@@ -19,22 +19,43 @@ _ASSETS_DIR = _assets_dir()
 
 
 class TreeEngine:
-    """Loads and navigates a GuidWire decision tree."""
+    """Loads and navigates a GuidWire decision tree.
 
-    def __init__(self) -> None:
-        tree_path = _ASSETS_DIR / "tree.json"
-        config_path = _ASSETS_DIR / "config.json"
+    Can be initialised either from the embedded assets directory (default,
+    used by the single-document viewer) or from an already-loaded dict
+    (used by the library viewer).
+    """
 
-        if not tree_path.exists():
-            raise FileNotFoundError(f"tree.json not found at {tree_path}")
-        if not config_path.exists():
-            raise FileNotFoundError(f"config.json not found at {config_path}")
+    def __init__(
+        self,
+        tree_dict: dict[str, Any] | None = None,
+        company_name: str = "GuidWire",
+    ) -> None:
+        """
+        Args:
+            tree_dict: Pre-loaded tree dictionary.  When *None* the engine
+                       reads ``tree.json`` and ``config.json`` from the
+                       embedded assets directory (original behaviour).
+            company_name: Company name to expose via :attr:`company_name`
+                          when *tree_dict* is supplied directly.
+        """
+        if tree_dict is not None:
+            self._tree = tree_dict
+            self._config: dict[str, Any] = {"company_name": company_name}
+        else:
+            tree_path = _ASSETS_DIR / "tree.json"
+            config_path = _ASSETS_DIR / "config.json"
 
-        with tree_path.open(encoding="utf-8") as f:
-            self._tree: dict[str, Any] = json.load(f)
+            if not tree_path.exists():
+                raise FileNotFoundError(f"tree.json not found at {tree_path}")
+            if not config_path.exists():
+                raise FileNotFoundError(f"config.json not found at {config_path}")
 
-        with config_path.open(encoding="utf-8") as f:
-            self._config: dict[str, Any] = json.load(f)
+            with tree_path.open(encoding="utf-8") as f:
+                self._tree = json.load(f)
+
+            with config_path.open(encoding="utf-8") as f:
+                self._config = json.load(f)
 
         # Index nodes by id for O(1) lookup
         self._nodes: dict[str, dict[str, Any]] = {

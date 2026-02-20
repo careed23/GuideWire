@@ -18,9 +18,16 @@
 
 ## What GuidWire Does
 
-1. **Ingest** — Upload a `.pdf`, `.docx`, `.html`, or `.txt` support document.
-2. **Analyze** — Claude AI (claude-opus-4-5) reads the document and extracts every troubleshooting branch into a structured JSON decision tree.
-3. **Brand & Export** — Provide your company name and logo; GuidWire compiles a fully self-contained `GuidWire_<CompanyName>.exe` viewer that runs offline on any Windows machine — no Python required.
+GuidWire has two modes:
+
+**Single Document mode** — upload one `.pdf`, `.docx`, `.html`, or `.txt` file, let
+Claude generate a decision tree, preview and edit it, then export a branded
+standalone `.exe` viewer.
+
+**Bulk Library mode** — point GuidWire at a folder tree containing 10 GB+ of DOCX
+documentation, let it ingest and index everything (hash-based, incremental),
+generate a full library of troubleshooting trees grouped by category, and export
+an offline Library Viewer `.exe` for service-desk analysts.
 
 ---
 
@@ -61,7 +68,7 @@ python builder/main.py
 
 ---
 
-## Using the Builder — Step by Step
+## Single Document Mode — Step by Step
 
 ### Step 1 — Upload Document
 Click **Browse File** (or drag-and-drop) and select the support document you want to convert. Accepted formats: `.pdf`, `.docx`, `.html`, `.txt`.
@@ -82,17 +89,84 @@ GuidWire will run PyInstaller in the background and move the finished `GuidWire_
 
 ---
 
+## Bulk Library Mode — Step by Step
+
+Click **Bulk Library** in the sidebar to switch modes.
+
+### Step 1 — Select Knowledge Base Folder
+- Click **Browse Folder…** and choose the root folder of your documentation tree
+  (e.g. `D:\ForgedFiber37_KB\`).  GuidWire immediately scans and shows the DOCX
+  file count and total size.
+- Click **Output Base Folder…** and choose (or create) the content directory
+  (e.g. `D:\ForgedFiber37_Content\`).
+
+### Step 2 — Ingest & Index
+- Click **Start Ingest**.
+- GuidWire copies every DOCX file into
+  `<OutputBase>/docs/<same folder tree as source>/` and extracts its text.
+- A SHA-256 hash manifest (`manifest.json`) is written inside the output base.
+  Re-running skips unchanged files automatically.
+
+### Step 3 — Generate Tree Library
+- Enter your Anthropic API key.
+- Click **Generate Trees**.
+- Documents are grouped by top-level sub-folder (= category).  Claude generates
+  one decision-tree JSON per document.
+- Outputs:
+  - `<OutputBase>/trees/*.json` — one tree per document
+  - `<OutputBase>/library.json` — catalog with title, description, category,
+    tree file path, and source doc link for every tree
+
+### Step 4 — Export Offline Package
+- Enter the **Company Name** (e.g. `ForgedFiber37`).
+- Choose an **Output Directory** for the executable.
+- Click **Build Library Viewer .exe**.
+- GuidWire builds `GuidWire_<CompanyName>_LibraryViewer.exe`.
+
+Distribute to analysts by copying both the EXE and the content folder
+(e.g. `ForgedFiber37_Content/`) to the same directory.  The viewer reads
+directly from the folder — documents are never embedded in the EXE.
+
+---
+
+## Offline Library Viewer
+
+The Library Viewer provides:
+
+| Feature | Detail |
+|---|---|
+| **Category browser** | Sidebar listing all top-level-folder categories |
+| **Fast metadata search** | Search by title, description, or symptom tags |
+| **Tree navigator** | Step-by-step decision tree for any selected entry |
+| **Open Source Doc** | Launches the original DOCX in Word (or default app) |
+
+---
+
 ## Distributing the Viewer
 
-Simply send the `GuidWire_<CompanyName>.exe` to your end-users. It runs completely offline — no Python, no API keys, no installation required. The decision tree and company branding are embedded inside the executable.
+**Single-doc viewer:** send only `GuidWire_<CompanyName>.exe` — tree and branding are embedded.
+
+**Library viewer:** send both:
+```
+GuidWire_<CompanyName>_LibraryViewer.exe
+<CompanyName>_Content/          ← the content folder from Step 2–3
+  ├── library.json
+  ├── manifest.json
+  ├── trees/
+  │     └── *.json
+  └── docs/
+        └── <mirrored source folder tree>
+              └── *.docx
+```
 
 ---
 
 ## Notes on API Key Usage
 
-- Your Anthropic API key is used **only** during Step 2 (Analyze).
+- Your Anthropic API key is used **only** during the Analyze step (Single mode) or
+  the Generate Trees step (Bulk mode).
 - It is sent directly from your machine to the Anthropic API over HTTPS.
-- It is **never** written to disk, logged, or embedded in the packaged viewer.
+- It is **never** written to disk, logged, or embedded in any packaged viewer.
 
 ---
 
@@ -103,22 +177,28 @@ guidewire/
 │
 ├── builder/
 │   ├── main.py              # Builder entry point
-│   ├── ingestor.py          # DocumentIngestor — extracts text from files
+│   ├── ingestor.py          # DocumentIngestor — extracts text from a single file
+│   ├── bulk_ingestor.py     # BulkIngestor — folder scan, copy, hash manifest
 │   ├── analyzer.py          # DocumentAnalyzer — Claude AI integration
 │   ├── tree_builder.py      # TreeBuilder — validates & saves tree JSON
-│   ├── packager.py          # Packager — PyInstaller build pipeline
+│   ├── library_builder.py   # LibraryBuilder — generates library.json from manifest
+│   ├── packager.py          # Packager — single-doc & library-viewer PyInstaller builds
 │   └── ui/
-│       └── builder_ui.py    # CustomTkinter Builder GUI
+│       └── builder_ui.py    # CustomTkinter Builder GUI (Single + Bulk modes)
 │
 ├── viewer/
-│   ├── main.py              # Viewer entry point
-│   ├── tree_engine.py       # TreeEngine — loads & navigates the tree
+│   ├── main.py              # Single-doc viewer entry point
+│   ├── library_main.py      # Library viewer entry point
+│   ├── tree_engine.py       # TreeEngine — loads & navigates a decision tree
+│   ├── library_engine.py    # LibraryEngine — loads library.json, search, open doc
 │   ├── ui/
-│   │   └── viewer_ui.py     # CustomTkinter Viewer GUI
+│   │   ├── viewer_ui.py     # Single-doc viewer GUI
+│   │   └── library_viewer_ui.py  # Library viewer GUI
 │   └── assets/              # Injected at build time by Packager
 │       ├── logo.png
-│       ├── tree.json
-│       └── config.json
+│       ├── tree.json        # (single-doc builds)
+│       ├── config.json      # (single-doc builds)
+│       └── viewer_config.json  # (library builds — content folder name)
 │
 ├── requirements.txt
 └── README.md
