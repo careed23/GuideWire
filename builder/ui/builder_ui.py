@@ -258,14 +258,14 @@ class BuilderUI(ctk.CTk):
 
         ctk.CTkLabel(frame, text="Analyze Document",
                      font=ctk.CTkFont(size=22, weight="bold")).pack(pady=(10, 4), anchor="w")
-        ctk.CTkLabel(frame, text="Enter your Anthropic API key and let Claude extract the troubleshooting tree.",
+        ctk.CTkLabel(frame, text="Enter your Google Gemini API key and let Gemini extract the troubleshooting tree.",
                      text_color="gray60", wraplength=600, justify="left").pack(anchor="w", pady=(0, 20))
 
         api_row = ctk.CTkFrame(frame, fg_color="transparent")
         api_row.pack(fill="x", pady=5)
         ctk.CTkLabel(api_row, text="API Key:", width=80).pack(side="left")
         self._api_key_entry = ctk.CTkEntry(api_row, show="•", width=360,
-                                           placeholder_text="sk-ant-…")
+                                           placeholder_text="AIza…")
         self._api_key_entry.pack(side="left", padx=5)
         self._show_key_btn = ctk.CTkButton(api_row, text="Show", width=60,
                                            command=self._toggle_api_key_visibility)
@@ -484,11 +484,10 @@ class BuilderUI(ctk.CTk):
 
         api_key = self._api_key_entry.get().strip()
         if not api_key:
-            messagebox.showwarning("No API Key", "Please enter your Anthropic API key.")
+            messagebox.showwarning("No API Key", "Please enter your Google Gemini API key.")
             return
 
         self._analyze_btn.configure(state="disabled")
-        self._analysis_status.configure(text="Extracting document text…", text_color="gray60")
         self._analysis_progress.pack(pady=5)
         self._analysis_progress.start()
 
@@ -498,7 +497,7 @@ class BuilderUI(ctk.CTk):
                 raw_text = ingestor.ingest(self._file_path)
 
                 self.after(0, lambda: self._analysis_status.configure(
-                    text="Sending to Claude for analysis…", text_color="gray60"))
+                    text="Sending to Gemini for analysis…", text_color="gray60"))
 
                 analyzer = DocumentAnalyzer(api_key)
                 tree_dict = analyzer.analyze(raw_text)
@@ -791,7 +790,7 @@ class BuilderUI(ctk.CTk):
         ctk.CTkLabel(
             frame,
             text=(
-                "Enter your Anthropic API key.  GuidWire will group documents by"
+                "Enter your Google Gemini API key.  GuidWire will group documents by"
                 " top-level folder (category), generate a decision tree per document,"
                 " and write library.json."
             ),
@@ -802,7 +801,7 @@ class BuilderUI(ctk.CTk):
         api_row.pack(fill="x", pady=5)
         ctk.CTkLabel(api_row, text="API Key:", width=80).pack(side="left")
         self._bulk_api_key_entry = ctk.CTkEntry(api_row, show="•", width=340,
-                                                placeholder_text="sk-ant-…")
+                                                placeholder_text="AIza…")
         self._bulk_api_key_entry.pack(side="left", padx=5)
         self._bulk_show_key_btn = ctk.CTkButton(
             api_row, text="Show", width=60,
@@ -1004,7 +1003,7 @@ class BuilderUI(ctk.CTk):
             return
         api_key = self._bulk_api_key_entry.get().strip()
         if not api_key:
-            messagebox.showwarning("No API Key", "Please enter your Anthropic API key.")
+            messagebox.showwarning("No API Key", "Please enter your Google Gemini API key.")
             return
         if not self._bulk_output_base:
             messagebox.showwarning("No Output Folder",

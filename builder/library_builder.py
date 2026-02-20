@@ -1,7 +1,7 @@
 """Library building module for GuidWire Builder.
 
 Groups ingested documents by top-level-folder category, generates a
-decision-tree JSON per document via Claude, and writes a ``library.json``
+decision-tree JSON per document via Gemini, and writes a ``library.json``
 catalog that the offline viewer can browse and search.
 """
 
@@ -30,7 +30,7 @@ class LibraryBuilder:
             manifest: The manifest dict produced by :class:`BulkIngestor`.
             output_base: Base content folder (``*_Content``).  Trees are
                          written to ``output_base/trees/``.
-            api_key: Anthropic API key passed to :class:`DocumentAnalyzer`.
+            api_key: Google Gemini API key passed to :class:`DocumentAnalyzer`.
             progress_callback: Optional ``callback(message, current, total)``.
 
         Returns:
