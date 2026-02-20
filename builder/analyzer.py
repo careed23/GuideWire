@@ -1,6 +1,7 @@
 """Claude-powered document analysis module for GuidWire Builder."""
 
 import json
+import re
 from typing import Any
 
 
@@ -77,14 +78,8 @@ class DocumentAnalyzer:
         raw_response = message.content[0].text.strip()
 
         # Strip markdown code fences if Claude included them despite instructions
-        if raw_response.startswith("```"):
-            lines = raw_response.splitlines()
-            # Remove opening fence (```json or ```)
-            lines = lines[1:]
-            # Remove closing fence
-            if lines and lines[-1].strip().startswith("```"):
-                lines = lines[:-1]
-            raw_response = "\n".join(lines).strip()
+        raw_response = re.sub(r"^```[a-zA-Z]*\n?", "", raw_response, flags=re.IGNORECASE)
+        raw_response = re.sub(r"\n?```$", "", raw_response, flags=re.IGNORECASE).strip()
 
         try:
             return json.loads(raw_response)

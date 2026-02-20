@@ -116,6 +116,7 @@ class Packager:
                 capture_output=True,
                 text=True,
                 cwd=str(work_dir),
+                timeout=600,
             )
 
             if result.returncode != 0:
