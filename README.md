@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
-  <a href="https://www.anthropic.com/"><img src="https://img.shields.io/badge/AI-Claude%20(Anthropic)-blueviolet?logo=anthropic&logoColor=white" alt="Claude AI"></a>
+  <a href="https://ai.google.dev/"><img src="https://img.shields.io/badge/AI-Gemini%20(Google)-blue?logo=google&logoColor=white" alt="Gemini AI"></a>
   <a href="https://pyinstaller.org/"><img src="https://img.shields.io/badge/packaged%20with-PyInstaller-orange?logo=pyinstaller&logoColor=white" alt="PyInstaller"></a>
   <img src="https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white" alt="Windows">
 </p>
@@ -21,7 +21,7 @@
 GuidWire has two modes:
 
 **Single Document mode** — upload one `.pdf`, `.docx`, `.html`, or `.txt` file, let
-Claude generate a decision tree, preview and edit it, then export a branded
+Gemini generate a decision tree, preview and edit it, then export a branded
 standalone `.exe` viewer.
 
 **Bulk Library mode** — point GuidWire at a folder tree containing 10 GB+ of DOCX
@@ -34,7 +34,7 @@ an offline Library Viewer `.exe` for service-desk analysts.
 ## Prerequisites
 
 - Python 3.11 or later
-- An [Anthropic API key](https://console.anthropic.com/) (required only during the **Analyze** step)
+- A [Google Gemini API key](https://aistudio.google.com/app/apikey) (required only during the **Analyze** step)
 - Windows, macOS, or Linux for running the Builder
 - Windows target for the packaged Viewer `.exe`
 
@@ -74,7 +74,7 @@ python builder/main.py
 Click **Browse File** (or drag-and-drop) and select the support document you want to convert. Accepted formats: `.pdf`, `.docx`, `.html`, `.txt`.
 
 ### Step 2 — Analyze
-Enter your Anthropic API key (it is never stored to disk). Click **Analyze Document**. GuidWire extracts the document text and sends it to Claude, which returns a fully structured decision tree. A success message will confirm the number of nodes extracted.
+Enter your Google Gemini API key (it is never stored to disk). Click **Analyze Document**. GuidWire extracts the document text and sends it to Gemini, which returns a fully structured decision tree. A success message will confirm the number of nodes extracted.
 
 ### Step 3 — Preview Tree
 Review the extracted nodes. Each node shows its **ID**, **type** (`question`, `step`, or `resolution`), and a text preview. Click **Edit** on any node to fine-tune the wording before packaging.
@@ -108,9 +108,9 @@ Click **Bulk Library** in the sidebar to switch modes.
   Re-running skips unchanged files automatically.
 
 ### Step 3 — Generate Tree Library
-- Enter your Anthropic API key.
+- Enter your Google Gemini API key.
 - Click **Generate Trees**.
-- Documents are grouped by top-level sub-folder (= category).  Claude generates
+- Documents are grouped by top-level sub-folder (= category).  Gemini generates
   one decision-tree JSON per document.
 - Outputs:
   - `<OutputBase>/trees/*.json` — one tree per document
@@ -163,9 +163,9 @@ GuidWire_<CompanyName>_LibraryViewer.exe
 
 ## Notes on API Key Usage
 
-- Your Anthropic API key is used **only** during the Analyze step (Single mode) or
+- Your Google Gemini API key is used **only** during the Analyze step (Single mode) or
   the Generate Trees step (Bulk mode).
-- It is sent directly from your machine to the Anthropic API over HTTPS.
+- It is sent directly from your machine to the Google Gemini API over HTTPS.
 - It is **never** written to disk, logged, or embedded in any packaged viewer.
 
 ---
@@ -179,7 +179,7 @@ guidewire/
 │   ├── main.py              # Builder entry point
 │   ├── ingestor.py          # DocumentIngestor — extracts text from a single file
 │   ├── bulk_ingestor.py     # BulkIngestor — folder scan, copy, hash manifest
-│   ├── analyzer.py          # DocumentAnalyzer — Claude AI integration
+│   ├── analyzer.py          # DocumentAnalyzer — Google Gemini AI integration
 │   ├── tree_builder.py      # TreeBuilder — validates & saves tree JSON
 │   ├── library_builder.py   # LibraryBuilder — generates library.json from manifest
 │   ├── packager.py          # Packager — single-doc & library-viewer PyInstaller builds

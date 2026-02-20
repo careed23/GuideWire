@@ -1,4 +1,4 @@
-"""Claude-powered document analysis module for GuidWire Builder."""
+"""Gemini-powered document analysis module for GuidWire Builder."""
 
 import json
 import re
@@ -42,20 +42,21 @@ _PROMPT_TEMPLATE = (
 
 
 class DocumentAnalyzer:
-    """Sends extracted document text to Claude and parses the structured response."""
+    """Sends extracted document text to Gemini and parses the structured response."""
 
     def __init__(self, api_key: str) -> None:
-        """Initialize the analyzer with an Anthropic API key.
+        """Initialize the analyzer with a Google Gemini API key.
 
         Args:
-            api_key: A valid Anthropic API key.
+            api_key: A valid Google Gemini API key.
         """
-        import anthropic
+        import google.generativeai as genai
 
-        self._client = anthropic.Anthropic(api_key=api_key)
+        genai.configure(api_key=api_key)
+        self._model = genai.GenerativeModel("gemini-1.5-pro")
 
     def analyze(self, raw_text: str) -> dict[str, Any]:
-        """Send document text to Claude and return a parsed tree dict.
+        """Send document text to Gemini and return a parsed tree dict.
 
         Args:
             raw_text: The plain-text content of the ingested document.
@@ -64,30 +65,16 @@ class DocumentAnalyzer:
             A Python dict following the GuidWire tree schema.
 
         Raises:
-            ValueError: If Claude's response cannot be parsed as valid JSON.
-            anthropic.APIError: For network or API-level errors (propagated).
+            ValueError: If Gemini's response cannot be parsed as valid JSON.
+            google.api_core.exceptions.GoogleAPIError: For network or API-level
+                errors (propagated).
         """
         prompt = _PROMPT_TEMPLATE.format(document_text=raw_text)
 
-        message = self._client.messages.create(
-            model="claude-opus-4-5",
-            max_tokens=8192,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        response = self._model.generate_content(prompt)
+        raw_response = response.text.strip()
 
-        # Locate the first text block — some models prepend thinking blocks
-        text_block = next(
-            (block for block in message.content if block.type == "text"),
-            None,
-        )
-        if text_block is None:
-            raise ValueError(
-                "Claude returned a response containing no text content block. "
-                f"Block types received: {[block.type for block in message.content]}"
-            )
-        raw_response = text_block.text.strip()
-
-        # Strip markdown code fences if Claude included them despite instructions
+        # Strip markdown code fences if Gemini included them despite instructions
         raw_response = re.sub(r"^```[a-zA-Z]*\n?", "", raw_response, flags=re.IGNORECASE)
         raw_response = re.sub(r"\n?```$", "", raw_response, flags=re.IGNORECASE).strip()
 
@@ -95,6 +82,6 @@ class DocumentAnalyzer:
             return json.loads(raw_response)
         except json.JSONDecodeError as exc:
             raise ValueError(
-                f"Claude returned a response that could not be parsed as JSON: {exc}\n"
+                f"Gemini returned a response that could not be parsed as JSON: {exc}\n"
                 f"Raw response (first 500 chars):\n{raw_response[:500]}"
             ) from exc
