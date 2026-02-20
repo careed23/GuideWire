@@ -1,8 +1,18 @@
-# GuidWire
+<h1 align="center">GuideWire</h1>
 
-> **Follow the wire. Resolve the issue.**
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11%2B-blue?logo=python&logoColor=white" alt="Python 3.11+"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
+  <a href="https://www.anthropic.com/"><img src="https://img.shields.io/badge/AI-Claude%20(Anthropic)-blueviolet?logo=anthropic&logoColor=white" alt="Claude AI"></a>
+  <a href="https://pyinstaller.org/"><img src="https://img.shields.io/badge/packaged%20with-PyInstaller-orange?logo=pyinstaller&logoColor=white" alt="PyInstaller"></a>
+  <img src="https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white" alt="Windows">
+</p>
 
-GuidWire is a two-part AI-powered troubleshooting decision tree tool designed for IT support teams in BPO environments. The **Builder** application ingests support documentation, sends it to Claude AI to extract structured troubleshooting workflows, and packages the result into a branded, standalone **.exe** viewer. The **Viewer** application is the zero-dependency tool that walks end-users through every branch of the decision tree until they reach a resolution.
+<p align="center"><em>Follow the wire. Resolve the issue.</em></p>
+
+<p align="center">
+  An AI-powered troubleshooting tool that converts support documentation into branded, offline decision-tree viewers for IT teams — no Python required on the end-user's machine.
+</p>
 
 ---
 
