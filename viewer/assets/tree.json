@@ -1,0 +1,64 @@
+{
+  "title": "Sample Network Connectivity Troubleshooting",
+  "description": "Helps resolve common network connectivity issues step by step.",
+  "nodes": [
+    {
+      "id": "start",
+      "type": "question",
+      "text": "Is the device able to connect to the internet?",
+      "options": [
+        { "label": "Yes", "next": "check_speed" },
+        { "label": "No", "next": "check_cable" }
+      ]
+    },
+    {
+      "id": "check_speed",
+      "type": "question",
+      "text": "Is the internet connection speed satisfactory?",
+      "options": [
+        { "label": "Yes", "next": "resolve_ok" },
+        { "label": "No", "next": "restart_router" }
+      ]
+    },
+    {
+      "id": "check_cable",
+      "type": "step",
+      "text": "Check that the network cable is firmly plugged into both the device and the router/switch.",
+      "next": "cable_check_result"
+    },
+    {
+      "id": "cable_check_result",
+      "type": "question",
+      "text": "After re-seating the cable, is the device now connected?",
+      "options": [
+        { "label": "Yes", "next": "resolve_ok" },
+        { "label": "No", "next": "restart_router" }
+      ]
+    },
+    {
+      "id": "restart_router",
+      "type": "step",
+      "text": "Power cycle the router: unplug it from the wall, wait 30 seconds, then plug it back in. Wait 60 seconds for it to fully restart.",
+      "next": "router_check_result"
+    },
+    {
+      "id": "router_check_result",
+      "type": "question",
+      "text": "Is the device now connected after the router restart?",
+      "options": [
+        { "label": "Yes", "next": "resolve_ok" },
+        { "label": "No", "next": "resolve_escalate" }
+      ]
+    },
+    {
+      "id": "resolve_ok",
+      "type": "resolution",
+      "text": "The connectivity issue has been resolved. The device is now connected to the internet successfully."
+    },
+    {
+      "id": "resolve_escalate",
+      "type": "resolution",
+      "text": "Basic troubleshooting has not resolved the issue. Please escalate to the network team with a description of the steps already taken."
+    }
+  ]
+}
