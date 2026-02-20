@@ -75,7 +75,17 @@ class DocumentAnalyzer:
             messages=[{"role": "user", "content": prompt}],
         )
 
-        raw_response = message.content[0].text.strip()
+        # Locate the first text block — some models prepend thinking blocks
+        text_block = next(
+            (block for block in message.content if block.type == "text"),
+            None,
+        )
+        if text_block is None:
+            raise ValueError(
+                "Claude returned a response containing no text content block. "
+                f"Block types received: {[block.type for block in message.content]}"
+            )
+        raw_response = text_block.text.strip()
 
         # Strip markdown code fences if Claude included them despite instructions
         raw_response = re.sub(r"^```[a-zA-Z]*\n?", "", raw_response, flags=re.IGNORECASE)
