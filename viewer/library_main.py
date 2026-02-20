@@ -20,8 +20,8 @@ import customtkinter as ctk
 
 def _read_content_folder_name() -> str:
     """Read the content folder name from ``viewer_config.json``."""
-    if getattr(sys, "frozen", False):
-        cfg_path = Path(sys.executable).parent / "viewer_config.json"
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        cfg_path = Path(sys._MEIPASS) / "assets" / "viewer_config.json"
     else:
         cfg_path = Path(__file__).parent / "assets" / "viewer_config.json"
 

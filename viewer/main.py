@@ -32,10 +32,26 @@ def main() -> None:
         root.mainloop()
         return
 
-    engine = TreeEngine()
-    app = ViewerUI(engine)
-    app.mainloop()
+    try:
+        engine = TreeEngine()
+        app = ViewerUI(engine)
+    except Exception as exc:
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("dark-blue")
+        root = ctk.CTk()
+        root.title("GuidWire Viewer — Error")
+        root.geometry("500x200")
+        ctk.CTkLabel(
+            root,
+            text=f"Failed to load GuidWire data:\n{exc}",
+            wraplength=460,
+            text_color="#F44336",
+            font=ctk.CTkFont(size=13),
+        ).pack(expand=True, padx=20, pady=20)
+        root.mainloop()
+        return
 
+    app.mainloop()
 
 if __name__ == "__main__":
     main()
