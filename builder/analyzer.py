@@ -53,7 +53,7 @@ class DocumentAnalyzer:
         import google.generativeai as genai
 
         genai.configure(api_key=api_key)
-        self._model = genai.GenerativeModel("gemini-2.0-flash")
+        self._model = genai.GenerativeModel("gemini-2.5-flash")
 
     def analyze(self, raw_text: str) -> dict[str, Any]:
         """Send document text to Gemini and return a parsed tree dict.
