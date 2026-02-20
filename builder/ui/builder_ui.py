@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-import tempfile
 import threading
 from pathlib import Path
 from tkinter import filedialog, messagebox
@@ -649,12 +647,11 @@ class BuilderUI(ctk.CTk):
 
         def _worker() -> None:
             try:
-                # Save tree to a temp file
-                with tempfile.NamedTemporaryFile(
-                    suffix=".json", delete=False, mode="w", encoding="utf-8"
-                ) as tmp_f:
-                    json.dump(self._tree_dict, tmp_f, indent=2)
-                    tmp_tree_path = Path(tmp_f.name)
+                # Save tree.json to the output directory
+                tree_builder = TreeBuilder()
+                tree_json_path = tree_builder.save(
+                    self._tree_dict, self._output_dir / "tree.json"
+                )
 
                 def _progress(msg: str) -> None:
                     self.after(0, lambda m=msg: self._build_status.configure(
@@ -662,14 +659,13 @@ class BuilderUI(ctk.CTk):
 
                 packager = Packager()
                 exe_path = packager.build(
-                    tree_json_path=tmp_tree_path,
+                    tree_json_path=tree_json_path,
                     logo_path=self._logo_path,
                     company_name=company_name,
                     output_dir=self._output_dir,
                     progress_callback=_progress,
                 )
 
-                tmp_tree_path.unlink(missing_ok=True)
                 self.after(0, lambda: self._on_build_success(exe_path))
             except Exception as exc:
                 self.after(0, lambda: self._on_build_error(str(exc)))
