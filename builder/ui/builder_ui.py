@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-_LOGO_THUMB_SIZE: tuple[int, int] = (80, 80)
-
+import json
+import tempfile
 import threading
 from pathlib import Path
 from tkinter import filedialog, messagebox
@@ -11,6 +11,13 @@ from typing import Any
 
 import customtkinter as ctk
 from PIL import Image, ImageTk
+
+from builder.analyzer import DocumentAnalyzer
+from builder.ingestor import DocumentIngestor
+from builder.packager import Packager
+from builder.tree_builder import TreeBuilder
+
+_LOGO_THUMB_SIZE: tuple[int, int] = (80, 80)
 
 
 # ---------------------------------------------------------------------------
@@ -384,10 +391,6 @@ class BuilderUI(ctk.CTk):
 
         def _worker() -> None:
             try:
-                from builder.ingestor import DocumentIngestor
-                from builder.analyzer import DocumentAnalyzer
-                from builder.tree_builder import TreeBuilder
-
                 ingestor = DocumentIngestor()
                 raw_text = ingestor.ingest(self._file_path)
 
@@ -541,15 +544,10 @@ class BuilderUI(ctk.CTk):
 
         def _worker() -> None:
             try:
-                import tempfile
-                from builder.tree_builder import TreeBuilder
-                from builder.packager import Packager
-
                 # Save tree to a temp file
                 with tempfile.NamedTemporaryFile(
                     suffix=".json", delete=False, mode="w", encoding="utf-8"
                 ) as tmp_f:
-                    import json
                     json.dump(self._tree_dict, tmp_f, indent=2)
                     tmp_tree_path = Path(tmp_f.name)
 

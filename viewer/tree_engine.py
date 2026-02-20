@@ -3,11 +3,19 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 
-_ASSETS_DIR = Path(__file__).parent / "assets"
+def _assets_dir() -> Path:
+    """Return the assets directory, whether running from source or a PyInstaller bundle."""
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / "assets"
+    return Path(__file__).parent / "assets"
+
+
+_ASSETS_DIR = _assets_dir()
 
 
 class TreeEngine:
@@ -78,7 +86,7 @@ class TreeEngine:
 
         for option in node.get("options", []):
             if option["label"] == option_label:
-                self._history.append(node["text"])
+                self._history.append(self._current_id)
                 self._current_id = option["next"]
                 return
 
@@ -97,7 +105,7 @@ class TreeEngine:
             raise ValueError(
                 f"advance() called on non-step node '{self._current_id}'"
             )
-        self._history.append(node["text"])
+        self._history.append(self._current_id)
         self._current_id = node["next"]
 
     def reset(self) -> None:
@@ -107,7 +115,7 @@ class TreeEngine:
 
     def get_history(self) -> list[str]:
         """Return list of visited node texts for breadcrumb display."""
-        return list(self._history)
+        return [self._nodes[nid]["text"] for nid in self._history]
 
     def is_complete(self) -> bool:
         """Return True if the current node is a resolution (terminal) node."""
@@ -121,18 +129,7 @@ class TreeEngine:
         """
         if not self._history:
             return False
-
-        # We need to find which node had the text that is last in history
-        target_text = self._history[-1]
-        for node_id, node in self._nodes.items():
-            if node["text"] == target_text:
-                self._history.pop()
-                self._current_id = node_id
-                return True
-
-        # Fallback: just pop history and reset to start
-        self._history.pop()
-        self._current_id = "start"
+        self._current_id = self._history.pop()
         return True
 
     def approximate_total_steps(self) -> int:

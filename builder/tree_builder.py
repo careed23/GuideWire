@@ -37,7 +37,11 @@ class TreeBuilder:
                     raise ValueError(f"Node is missing required key: '{key}'. Node: {node}")
             node_ids.add(node["id"])
 
-        # Validate each node according to its type
+        if "start" not in node_ids:
+            raise ValueError("Tree must contain a node with id 'start'")
+
+        # Build an adjacency map to enable reachability traversal from 'start'
+        adjacency: dict[str, list[str]] = {nid: [] for nid in node_ids}
         for node in nodes:
             node_type: str = node["type"]
             node_id: str = node["id"]
@@ -60,6 +64,7 @@ class TreeBuilder:
                             f"Option '{opt['label']}' in node '{node_id}' references "
                             f"unknown node id: '{opt['next']}'"
                         )
+                    adjacency[node_id].append(opt["next"])
 
             elif node_type == "step":
                 next_id = node.get("next")
@@ -71,6 +76,7 @@ class TreeBuilder:
                     raise ValueError(
                         f"Step node '{node_id}' references unknown node id: '{next_id}'"
                     )
+                adjacency[node_id].append(next_id)
 
             elif node_type == "resolution":
                 if node.get("next") or node.get("options"):
@@ -83,6 +89,23 @@ class TreeBuilder:
                     f"Node '{node_id}' has unknown type: '{node_type}'. "
                     "Allowed types: question, step, resolution"
                 )
+
+        # BFS from 'start' to find all nodes reachable through the tree
+        visited: set[str] = set()
+        queue: list[str] = ["start"]
+        while queue:
+            current = queue.pop()
+            if current in visited:
+                continue
+            visited.add(current)
+            queue.extend(adjacency[current])
+
+        unreachable = node_ids - visited
+        if unreachable:
+            raise ValueError(
+                f"The following nodes are unreachable from 'start': "
+                f"{sorted(unreachable)}"
+            )
 
         return True
 
