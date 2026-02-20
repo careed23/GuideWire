@@ -10,23 +10,23 @@ _PROMPT_TEMPLATE = (
     "support documentation and extract ALL troubleshooting workflows it contains.\n\n"
     "Return ONLY a valid JSON object with no markdown, no explanation, and no "
     "code blocks. The JSON must follow this exact schema:\n\n"
-    "{\n"
+    "{{\n"
     '  "title": "string — the main issue or topic this document addresses",\n'
     '  "description": "string — one sentence summary of what this tree helps resolve",\n'
     '  "nodes": [\n'
-    "    {\n"
+    "    {{\n"
     '      "id": "string — unique node id, start with start for the first node",\n'
     '      "type": "string — either question, step, or resolution",\n'
     '      "text": "string — the question asked, instruction given, or resolution message",\n'
     '      "options": [\n'
-    "        {\n"
+    "        {{\n"
     '          "label": "string — the option label shown to the user",\n'
     '          "next": "string — the id of the next node this option leads to"\n'
-    "        }\n"
+    "        }}\n"
     "      ]\n"
-    "    }\n"
+    "    }}\n"
     "  ]\n"
-    "}\n\n"
+    "}}\n\n"
     "Rules:\n"
     "- type question nodes must have an options array with at least 2 options\n"
     "- type step nodes have a single next field (string) pointing to the next node id, "
