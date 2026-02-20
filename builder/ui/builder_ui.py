@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+_LOGO_THUMB_SIZE: tuple[int, int] = (80, 80)
+
 import threading
 from pathlib import Path
 from tkinter import filedialog, messagebox
@@ -496,8 +498,8 @@ class BuilderUI(ctk.CTk):
             return
         try:
             img = Image.open(str(self._logo_path)).convert("RGBA")
-            img.thumbnail((80, 80))
-            ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(80, 80))
+            img.thumbnail(_LOGO_THUMB_SIZE)
+            ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=_LOGO_THUMB_SIZE)
             if self._logo_preview_label is None:
                 self._logo_preview_label = ctk.CTkLabel(
                     self._logo_thumb_frame, image=ctk_img, text="")

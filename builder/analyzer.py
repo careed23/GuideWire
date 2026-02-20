@@ -44,7 +44,7 @@ class DocumentAnalyzer:
     """Sends extracted document text to Claude and parses the structured response."""
 
     def __init__(self, api_key: str) -> None:
-        """Initialise the analyzer with an Anthropic API key.
+        """Initialize the analyzer with an Anthropic API key.
 
         Args:
             api_key: A valid Anthropic API key.
